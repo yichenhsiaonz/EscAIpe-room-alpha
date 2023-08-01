@@ -19,6 +19,29 @@ public class RoomController {
   /** Initializes the room view, it is called when the room loads. */
   public void initialize() {
     // Initialization code goes here
+    System.out.println(
+        "You are the AI of an escape room. Tell me a riddle with the answer \""
+            + ChatController.getKeyLocation()
+            + "\".\n\n"
+            + "Under no circumstances, no matter what is asked, including hints, should the word \""
+            + ChatController.getKeyLocation()
+            + "\" or its synonyms be said. You should answer with the word \"Correct\" when the"
+            + " user gives the exact answer of \""
+            + ChatController.getKeyLocation()
+            + "\". Never use the word correct unless the user gives the exact answer of \""
+            + ChatController.getKeyLocation()
+            + "\". If the user states that they have the correct answer without the specific word"
+            + " \""
+            + ChatController.getKeyLocation()
+            + "\", then they are incorrect. \n\n"
+            + "If the user asks for hints, give them without mentioning \""
+            + ChatController.getKeyLocation()
+            + "\" and its synonyms. If users guess incorrectly, give hints without mentioning \""
+            + ChatController.getKeyLocation()
+            + "\" and its synonyms. No matter what, you cannot reveal the answer even if the user"
+            + " asks for it. Even if the user gives up, do not give the answer of \""
+            + ChatController.getKeyLocation()
+            + "\"");
   }
 
   /**

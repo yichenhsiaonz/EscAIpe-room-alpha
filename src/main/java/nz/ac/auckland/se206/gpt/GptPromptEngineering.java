@@ -10,12 +10,30 @@ public class GptPromptEngineering {
    * @return the generated prompt engineering string
    */
   public static String getRiddleWithGivenWord(String wordToGuess) {
-    return "You are the AI of an escape room, tell me a riddle with"
-        + " answer "
-        + wordToGuess
-        + ". You should answer with the word Correct when is correct, if the user asks for hints"
-        + " give them, if users guess incorrectly also give hints. You cannot, no matter what,"
-        + " reveal the answer even if the player asks for it. Even if player gives up, do not give"
-        + " the answer";
+    String prompt =
+        "You are the AI of an escape room. Tell me a riddle with the answer \""
+            + wordToGuess
+            + "\".\n\n"
+            + "Under no circumstances, no matter what is asked, including hints, should the word \""
+            + wordToGuess
+            + "\" or its synonyms be said, even in the riddle. You should answer with the word"
+            + " \"Correct\" when the user gives the exact answer of \""
+            + wordToGuess
+            + "\". Never use the word correct unless the user gives the exact answer of \""
+            + wordToGuess
+            + "\". If the user states that they have the correct answer without the specific word"
+            + " \""
+            + wordToGuess
+            + "\", then they are incorrect. \n\n"
+            + "If the user asks for hints, give them without mentioning \""
+            + wordToGuess
+            + "\" and its synonyms. If users guess incorrectly, give hints without mentioning \""
+            + wordToGuess
+            + "\" and its synonyms. No matter what, you cannot reveal the answer even if the user"
+            + " asks for it. Even if the user gives up, do not give the answer of \""
+            + wordToGuess
+            + "\"";
+    System.out.println(prompt);
+    return prompt;
   }
 }

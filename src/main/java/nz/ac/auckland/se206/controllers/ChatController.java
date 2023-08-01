@@ -1,6 +1,8 @@
 package nz.ac.auckland.se206.controllers;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Random;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -21,6 +23,10 @@ public class ChatController {
   @FXML private TextField inputText;
   @FXML private Button sendButton;
 
+  private static List<String> keyLocationList = List.of("window");
+  private static Random rand = new Random();
+  private static String keyLocation = keyLocationList.get(rand.nextInt(keyLocationList.size()));
+
   private ChatCompletionRequest chatCompletionRequest;
 
   /**
@@ -30,9 +36,22 @@ public class ChatController {
    */
   @FXML
   public void initialize() throws ApiProxyException {
-    chatCompletionRequest =
-        new ChatCompletionRequest().setN(1).setTemperature(0.2).setTopP(0.5).setMaxTokens(100);
-    runGpt(new ChatMessage("user", GptPromptEngineering.getRiddleWithGivenWord("vase")));
+    javafx.concurrent.Task<Void> task =
+        new javafx.concurrent.Task<>() {
+          @Override
+          protected Void call() throws Exception {
+            chatCompletionRequest =
+                new ChatCompletionRequest()
+                    .setN(1)
+                    .setTemperature(0.2)
+                    .setTopP(0.5)
+                    .setMaxTokens(100);
+            runGpt(
+                new ChatMessage("user", GptPromptEngineering.getRiddleWithGivenWord(keyLocation)));
+            return null;
+          }
+        };
+    new Thread(task).start();
   }
 
   /**
@@ -98,5 +117,9 @@ public class ChatController {
   @FXML
   private void onGoBack(ActionEvent event) throws ApiProxyException, IOException {
     App.setRoot("room");
+  }
+
+  public static String getKeyLocation() {
+    return keyLocation;
   }
 }
