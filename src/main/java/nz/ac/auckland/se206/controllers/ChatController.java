@@ -1,15 +1,15 @@
 package nz.ac.auckland.se206.controllers;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Random;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import nz.ac.auckland.se206.App;
 import nz.ac.auckland.se206.GameState;
+import nz.ac.auckland.se206.SceneManager.AppUi;
 import nz.ac.auckland.se206.gpt.ChatMessage;
 import nz.ac.auckland.se206.gpt.GptPromptEngineering;
 import nz.ac.auckland.se206.gpt.openai.ApiProxyException;
@@ -23,10 +23,6 @@ public class ChatController {
   @FXML private TextField inputText;
   @FXML private Button sendButton;
 
-  private static List<String> keyLocationList = List.of("window");
-  private static Random rand = new Random();
-  private static String keyLocation = keyLocationList.get(rand.nextInt(keyLocationList.size()));
-
   private ChatCompletionRequest chatCompletionRequest;
 
   /**
@@ -36,7 +32,8 @@ public class ChatController {
    */
   @FXML
   public void initialize() throws ApiProxyException {
-    javafx.concurrent.Task<Void> task =
+    String instanceRiddleAnswer = App.riddleAnswer;
+    javafx.concurrent.Task<Void> prompTask =
         new javafx.concurrent.Task<>() {
           @Override
           protected Void call() throws Exception {
@@ -47,11 +44,12 @@ public class ChatController {
                     .setTopP(0.5)
                     .setMaxTokens(100);
             runGpt(
-                new ChatMessage("user", GptPromptEngineering.getRiddleWithGivenWord(keyLocation)));
+                new ChatMessage(
+                    "user", GptPromptEngineering.getRiddleWithGivenWord(instanceRiddleAnswer)));
             return null;
           }
         };
-    new Thread(task).start();
+    new Thread(prompTask).start();
   }
 
   /**
@@ -103,7 +101,40 @@ public class ChatController {
     appendChatMessage(msg);
     ChatMessage lastMsg = runGpt(msg);
     if (lastMsg.getRole().equals("assistant") && lastMsg.getContent().startsWith("Correct")) {
-      GameState.isRiddleResolved = true;
+      if (GameState.taskprogress == 0) {
+        switch (App.firstRiddleAnswer) {
+          case "window":
+            showDialog(
+                "Info",
+                "A small key is passed through the mail slot",
+                "You pick it up. It's too small to fit in the door lock.");
+            GameState.hasWindowKey = true;
+            break;
+          case "vase":
+            showDialog("Info", "A flower is passed through the mail slot", "You pick it up.");
+            GameState.hasFlower = true;
+            break;
+        }
+      } else if (GameState.taskprogress == 1) {
+        switch (App.riddleAnswer) {
+          case "vase":
+            showDialog(
+                "Info",
+                "A hand reaches in through the window holding a flower.",
+                "You take the flower.");
+            GameState.hasFlower = true;
+            break;
+          case "window":
+            showDialog(
+                "Info",
+                "A second secret compartment opens up with a small key inside.",
+                "You take the key.");
+            GameState.hasWindowKey = true;
+            break;
+        }
+      }
+      GameState.taskprogress++;
+      App.setRoot(AppUi.ROOM);
     }
   }
 
@@ -116,10 +147,14 @@ public class ChatController {
    */
   @FXML
   private void onGoBack(ActionEvent event) throws ApiProxyException, IOException {
-    App.setRoot("room");
+    App.setRoot(AppUi.ROOM);
   }
 
-  public static String getKeyLocation() {
-    return keyLocation;
+  private void showDialog(String title, String headerText, String message) {
+    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+    alert.setTitle(title);
+    alert.setHeaderText(headerText);
+    alert.setContentText(message);
+    alert.showAndWait();
   }
 }

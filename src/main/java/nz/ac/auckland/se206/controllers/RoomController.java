@@ -8,6 +8,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Rectangle;
 import nz.ac.auckland.se206.App;
 import nz.ac.auckland.se206.GameState;
+import nz.ac.auckland.se206.SceneManager.AppUi;
 
 /** Controller class for the room view. */
 public class RoomController {
@@ -19,29 +20,6 @@ public class RoomController {
   /** Initializes the room view, it is called when the room loads. */
   public void initialize() {
     // Initialization code goes here
-    System.out.println(
-        "You are the AI of an escape room. Tell me a riddle with the answer \""
-            + ChatController.getKeyLocation()
-            + "\".\n\n"
-            + "Under no circumstances, no matter what is asked, including hints, should the word \""
-            + ChatController.getKeyLocation()
-            + "\" or its synonyms be said. You should answer with the word \"Correct\" when the"
-            + " user gives the exact answer of \""
-            + ChatController.getKeyLocation()
-            + "\". Never use the word correct unless the user gives the exact answer of \""
-            + ChatController.getKeyLocation()
-            + "\". If the user states that they have the correct answer without the specific word"
-            + " \""
-            + ChatController.getKeyLocation()
-            + "\", then they are incorrect. \n\n"
-            + "If the user asks for hints, give them without mentioning \""
-            + ChatController.getKeyLocation()
-            + "\" and its synonyms. If users guess incorrectly, give hints without mentioning \""
-            + ChatController.getKeyLocation()
-            + "\" and its synonyms. No matter what, you cannot reveal the answer even if the user"
-            + " asks for it. Even if the user gives up, do not give the answer of \""
-            + ChatController.getKeyLocation()
-            + "\"");
   }
 
   /**
@@ -89,15 +67,18 @@ public class RoomController {
   public void clickDoor(MouseEvent event) throws IOException {
     System.out.println("door clicked");
 
-    if (!GameState.isRiddleResolved) {
-      showDialog("Info", "Riddle", "You need to resolve the riddle!");
-      App.setRoot("chat");
-      return;
-    }
-
-    if (!GameState.isKeyFound) {
+    if (GameState.taskprogress == 0) {
       showDialog(
-          "Info", "Find the key!", "You resolved the riddle, now you know where the key is.");
+          "Info",
+          "A riddle is written on a note taped to the door.",
+          "You need to resolve the riddle!");
+      App.setRoot(AppUi.DOOR_CHAT);
+      return;
+    } else if (GameState.taskprogress == 1) {
+      showDialog(
+          "Info", "Find the key!", "You resolved the riddle, now you know where to go next.");
+    } else if (GameState.taskprogress == 2) {
+      showDialog("Info", "You've solved the second riddle!", "Now you know where the key is.");
     } else {
       showDialog("Info", "You Won!", "Good Job!");
     }
@@ -109,11 +90,27 @@ public class RoomController {
    * @param event the mouse event
    */
   @FXML
-  public void clickVase(MouseEvent event) {
+  public void clickVase(MouseEvent event) throws IOException {
     System.out.println("vase clicked");
-    if (GameState.isRiddleResolved && !GameState.isKeyFound) {
-      showDialog("Info", "Key Found", "You found a key under the vase!");
-      GameState.isKeyFound = true;
+    if (GameState.hasFlower && GameState.taskprogress == 1) {
+      showDialog(
+          "Info",
+          "You put the flower in the vase.",
+          "A secret compartment opens with another riddle inside.");
+      App.setRoot(AppUi.SECOND_CHAT);
+    } else if (App.riddleAnswer.equals("vase") && GameState.taskprogress == 2) {
+      showDialog(
+          "Info",
+          "You put the flower in the vase.",
+          "A secret compartment opens with a larger key inside.");
+      GameState.taskprogress++;
+    } else if (App.firstRiddleAnswer.equals("vase") && GameState.taskprogress == 2) {
+      showDialog(
+          "Info", "There is nothing else in the compartment.", "You already have the small key.");
+    } else if (GameState.taskprogress == 3) {
+      showDialog("Info", "There is nothing else in the compartment.", "You already found the key.");
+    } else {
+      showDialog("Info", "Nothing happens.", " The vase is empty.");
     }
   }
 
@@ -123,7 +120,32 @@ public class RoomController {
    * @param event the mouse event
    */
   @FXML
-  public void clickWindow(MouseEvent event) {
+  public void clickWindow(MouseEvent event) throws IOException {
     System.out.println("window clicked");
+    if (GameState.hasWindowKey && GameState.taskprogress == 1) {
+      showDialog(
+          "Info",
+          "You put the small key in the keyhole.",
+          "It opens up just enough to lean out and read another riddle on the windowsill outside");
+      App.setRoot(AppUi.SECOND_CHAT);
+    } else if (App.riddleAnswer.equals("window") && GameState.taskprogress == 2) {
+      showDialog(
+          "Info",
+          "You put the small key in the keyhole.",
+          "It opens up just enough to lean out and grab a larger key on the windowsill outside.");
+      GameState.taskprogress++;
+    } else if (App.firstRiddleAnswer.equals("window") && GameState.taskprogress == 2) {
+      showDialog(
+          "Info",
+          "The opening isn't large enough to reach anything else.",
+          "You already have the flower.");
+    } else if (GameState.taskprogress == 3) {
+      showDialog(
+          "Info",
+          "The opening isn't large enough to reach anything else.",
+          "You already found the key.");
+    } else {
+      showDialog("Info", "Nothing happens.", " There is a small keyhole on the window.");
+    }
   }
 }
