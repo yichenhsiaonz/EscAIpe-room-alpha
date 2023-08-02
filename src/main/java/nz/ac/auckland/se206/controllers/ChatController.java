@@ -33,7 +33,8 @@ public class ChatController {
   @FXML
   public void initialize() throws ApiProxyException {
     String instanceRiddleAnswer = App.riddleAnswer;
-    javafx.concurrent.Task<Void> prompTask =
+    sendButton.setDisable(true);
+    javafx.concurrent.Task<Void> promptTask =
         new javafx.concurrent.Task<>() {
           @Override
           protected Void call() throws Exception {
@@ -46,10 +47,11 @@ public class ChatController {
             runGpt(
                 new ChatMessage(
                     "user", GptPromptEngineering.getRiddleWithGivenWord(instanceRiddleAnswer)));
+            sendButton.setDisable(false);
             return null;
           }
         };
-    new Thread(prompTask).start();
+    new Thread(promptTask).start();
   }
 
   /**
@@ -69,6 +71,7 @@ public class ChatController {
    * @throws ApiProxyException if there is an error communicating with the API proxy
    */
   private ChatMessage runGpt(ChatMessage msg) throws ApiProxyException {
+
     chatCompletionRequest.addMessage(msg);
     try {
       ChatCompletionResult chatCompletionResult = chatCompletionRequest.execute();
@@ -92,50 +95,62 @@ public class ChatController {
    */
   @FXML
   private void onSendMessage(ActionEvent event) throws ApiProxyException, IOException {
-    String message = inputText.getText();
-    if (message.trim().isEmpty()) {
-      return;
-    }
-    inputText.clear();
-    ChatMessage msg = new ChatMessage("user", message);
-    appendChatMessage(msg);
-    ChatMessage lastMsg = runGpt(msg);
-    if (lastMsg.getRole().equals("assistant") && lastMsg.getContent().startsWith("Correct")) {
-      if (GameState.taskprogress == 0) {
-        switch (App.firstRiddleAnswer) {
-          case "window":
-            showDialog(
-                "Info",
-                "A small key is passed through the mail slot",
-                "You pick it up. It's too small to fit in the door lock.");
-            GameState.hasWindowKey = true;
-            break;
-          case "vase":
-            showDialog("Info", "A flower is passed through the mail slot", "You pick it up.");
-            GameState.hasFlower = true;
-            break;
-        }
-      } else if (GameState.taskprogress == 1) {
-        switch (App.riddleAnswer) {
-          case "vase":
-            showDialog(
-                "Info",
-                "A hand reaches in through the window holding a flower.",
-                "You take the flower.");
-            GameState.hasFlower = true;
-            break;
-          case "window":
-            showDialog(
-                "Info",
-                "A second secret compartment opens up with a small key inside.",
-                "You take the key.");
-            GameState.hasWindowKey = true;
-            break;
-        }
-      }
-      GameState.taskprogress++;
-      App.setRoot(AppUi.ROOM);
-    }
+    sendButton.setDisable(true);
+    javafx.concurrent.Task<Void> sendTask =
+        new javafx.concurrent.Task<>() {
+          @Override
+          protected Void call() throws Exception {
+            String message = inputText.getText();
+            if (message.trim().isEmpty()) {
+              return null;
+            }
+            inputText.clear();
+            ChatMessage msg = new ChatMessage("user", message);
+            appendChatMessage(msg);
+            ChatMessage lastMsg = runGpt(msg);
+            if (lastMsg.getRole().equals("assistant")
+                && lastMsg.getContent().startsWith("Correct")) {
+              if (GameState.taskprogress == 0) {
+                switch (App.firstRiddleAnswer) {
+                  case "window":
+                    showDialog(
+                        "Info",
+                        "A small key is passed through the mail slot",
+                        "You pick it up. It's too small to fit in the door lock.");
+                    GameState.hasWindowKey = true;
+                    break;
+                  case "vase":
+                    showDialog(
+                        "Info", "A flower is passed through the mail slot", "You pick it up.");
+                    GameState.hasFlower = true;
+                    break;
+                }
+              } else if (GameState.taskprogress == 1) {
+                switch (App.riddleAnswer) {
+                  case "vase":
+                    showDialog(
+                        "Info",
+                        "A hand reaches in through the window holding a flower.",
+                        "You take the flower.");
+                    GameState.hasFlower = true;
+                    break;
+                  case "window":
+                    showDialog(
+                        "Info",
+                        "A second secret compartment opens up with a small key inside.",
+                        "You take the key.");
+                    GameState.hasWindowKey = true;
+                    break;
+                }
+              }
+              GameState.taskprogress++;
+              App.setRoot(AppUi.ROOM);
+            }
+            sendButton.setDisable(false);
+            return null;
+          }
+        };
+    new Thread(sendTask).start();
   }
 
   /**
