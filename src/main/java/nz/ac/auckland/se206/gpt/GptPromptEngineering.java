@@ -33,7 +33,6 @@ public class GptPromptEngineering {
             + " asks for it. Even if the user gives up, do not give the answer of \""
             + wordToGuess
             + "\"";
-    System.out.println(prompt);
     return prompt;
   }
 }

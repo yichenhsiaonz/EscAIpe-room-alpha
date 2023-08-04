@@ -2,7 +2,8 @@ package nz.ac.auckland.se206;
 
 /** Represents the state of the game. */
 public class GameState {
-  public static int taskprogress = 0;
+
+  public static int taskProgress = 0;
 
   /** Indicates whether the vase riddle has been resolved. */
   public static boolean hasFlower = false;
