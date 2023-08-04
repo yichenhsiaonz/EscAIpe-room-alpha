@@ -2,7 +2,6 @@ package nz.ac.auckland.se206.controllers;
 
 import java.io.IOException;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -122,7 +121,8 @@ public class RoomController {
       App.showDialog(
           "Info", "There is nothing else in the compartment.", "You already have the small key.");
     } else if (GameState.taskProgress == 3) {
-      App.showDialog("Info", "There is nothing else in the compartment.", "You already found the key.");
+      App.showDialog(
+          "Info", "There is nothing else in the compartment.", "You already found the key.");
     } else {
       App.showDialog("Info", "Nothing happens.", " The vase is empty.");
     }
@@ -135,38 +135,43 @@ public class RoomController {
    */
   @FXML
   public void clickWindow(MouseEvent event) throws IOException {
-    System.out.println("window clicked");
-    if (GameState.hasWindowKey && GameState.taskProgress == 1) {
-      App.showDialog(
-          "Info",
-          "You put the small key in the keyhole.",
-          "It opens up just enough to lean out and read another riddle on the windowsill outside");
-      if (secondGenerated) {
-        App.setRoot(AppUi.SECOND_CHAT);
+    try {
+      System.out.println("window clicked");
+      if (GameState.hasWindowKey && GameState.taskProgress == 1) {
+        App.showDialog(
+            "Info",
+            "You put the small key in the keyhole.",
+            "It opens up just enough to lean out and read another riddle on the windowsill"
+                + " outside");
+        if (secondGenerated) {
+          App.setRoot(AppUi.SECOND_CHAT);
+        } else {
+          currentRiddleAnswer = App.secondRiddleAnswer;
+          SceneManager.addUi(AppUi.SECOND_CHAT, App.loadFxml("chat"));
+          secondGenerated = true;
+          App.setRoot(AppUi.SECOND_CHAT);
+        }
+      } else if (App.secondRiddleAnswer.equals("window") && GameState.taskProgress == 2) {
+        App.showDialog(
+            "Info",
+            "You put the small key in the keyhole.",
+            "It opens up just enough to lean out and grab a larger key on the windowsill outside.");
+        GameState.taskProgress++;
+      } else if (App.firstRiddleAnswer.equals("window") && GameState.taskProgress == 2) {
+        App.showDialog(
+            "Info",
+            "The opening isn't large enough to reach anything else.",
+            "You already have the flower.");
+      } else if (GameState.taskProgress == 3) {
+        App.showDialog(
+            "Info",
+            "The opening isn't large enough to reach anything else.",
+            "You already found the key.");
       } else {
-        currentRiddleAnswer = App.secondRiddleAnswer;
-        SceneManager.addUi(AppUi.SECOND_CHAT, App.loadFxml("chat"));
-        secondGenerated = true;
-        App.setRoot(AppUi.SECOND_CHAT);
+        App.showDialog("Info", "Nothing happens.", " There is a small keyhole on the window.");
       }
-    } else if (App.secondRiddleAnswer.equals("window") && GameState.taskProgress == 2) {
-      App.showDialog(
-          "Info",
-          "You put the small key in the keyhole.",
-          "It opens up just enough to lean out and grab a larger key on the windowsill outside.");
-      GameState.taskProgress++;
-    } else if (App.firstRiddleAnswer.equals("window") && GameState.taskProgress == 2) {
-      App.showDialog(
-          "Info",
-          "The opening isn't large enough to reach anything else.",
-          "You already have the flower.");
-    } else if (GameState.taskProgress == 3) {
-      App.showDialog(
-          "Info",
-          "The opening isn't large enough to reach anything else.",
-          "You already found the key.");
-    } else {
-      App.showDialog("Info", "Nothing happens.", " There is a small keyhole on the window.");
+    } catch (Exception e) {
+      System.out.println(e);
     }
   }
 }

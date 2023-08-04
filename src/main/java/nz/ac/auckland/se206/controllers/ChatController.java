@@ -24,7 +24,6 @@ public class ChatController {
   @FXML private TextField inputText;
   @FXML private Button sendButton;
   @FXML private ProgressBar chatTimer;
-
   private String popupTitle;
   private String popupBody;
   private ChatCompletionRequest chatCompletionRequest;
@@ -35,27 +34,31 @@ public class ChatController {
    * @throws ApiProxyException if there is an error communicating with the API proxy
    */
   @FXML
-  public void initialize() throws ApiProxyException {
-    chatTimer.progressProperty().bind(App.timerTask.progressProperty());
+  public void initialize() throws IOException, ApiProxyException {
+    try {
+      chatTimer.progressProperty().bind(App.timerTask.progressProperty());
 
-    String instanceRiddleAnswer = RoomController.currentRiddleAnswer;
-    javafx.concurrent.Task<Void> promptTask =
-        new javafx.concurrent.Task<>() {
-          @Override
-          protected Void call() throws Exception {
-            chatCompletionRequest =
-                new ChatCompletionRequest()
-                    .setN(1)
-                    .setTemperature(0.2)
-                    .setTopP(0.5)
-                    .setMaxTokens(100);
-            runGpt(
-                new ChatMessage(
-                    "user", GptPromptEngineering.getRiddleWithGivenWord(instanceRiddleAnswer)));
-            return null;
-          }
-        };
-    new Thread(promptTask).start();
+      String instanceRiddleAnswer = RoomController.currentRiddleAnswer;
+      javafx.concurrent.Task<Void> promptTask =
+          new javafx.concurrent.Task<>() {
+            @Override
+            protected Void call() throws Exception {
+              chatCompletionRequest =
+                  new ChatCompletionRequest()
+                      .setN(1)
+                      .setTemperature(0.2)
+                      .setTopP(0.5)
+                      .setMaxTokens(100);
+              runGpt(
+                  new ChatMessage(
+                      "user", GptPromptEngineering.getRiddleWithGivenWord(instanceRiddleAnswer)));
+              return null;
+            }
+          };
+      new Thread(promptTask).start();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -88,16 +91,16 @@ public class ChatController {
               Runnable addGptMessage = () -> appendChatMessage(result.getChatMessage());
               sendButton.setDisable(false);
               Platform.runLater(addGptMessage);
-
-              // javafx.concurrent.Task<Void> readMessageTask =
-              //     new javafx.concurrent.Task<>() {
-              //       @Override
-              //       protected Void call() throws Exception {
-              //         App.voice.speak(result.getChatMessage().getContent());
-              //         return null;
-              //       }
-              //     };
-              // new Thread(readMessageTask).start();
+              javafx.concurrent.Task<Void> readMessageTask =
+                  new javafx.concurrent.Task<>() {
+                    @Override
+                    protected Void call() throws Exception {
+                      String[] inputArray = result.getChatMessage().getContent().split(" ");
+                      App.voice.speak(inputArray);
+                      return null;
+                    }
+                  };
+              new Thread(readMessageTask).start();
               if (result.getChatMessage().getRole().equals("assistant")
                   && result.getChatMessage().getContent().startsWith("Correct")) {
                 if (GameState.taskProgress == 0) {
@@ -152,14 +155,18 @@ public class ChatController {
    */
   @FXML
   private void onSendMessage(ActionEvent event) throws ApiProxyException, IOException {
-    String message = inputText.getText();
-    if (message.trim().isEmpty()) {
-      return;
+    try {
+      String message = inputText.getText();
+      if (message.trim().isEmpty()) {
+        return;
+      }
+      inputText.clear();
+      ChatMessage msg = new ChatMessage("user", message);
+      appendChatMessage(msg);
+      runGpt(msg);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
-    inputText.clear();
-    ChatMessage msg = new ChatMessage("user", message);
-    appendChatMessage(msg);
-    runGpt(msg);
   }
 
   /**

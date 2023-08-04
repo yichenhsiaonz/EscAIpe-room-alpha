@@ -50,7 +50,12 @@ public class App extends Application {
    * @throws IOException If the file is not found.
    */
   public static Parent loadFxml(String fxml) throws IOException {
-    return new FXMLLoader(App.class.getResource("/fxml/" + fxml + ".fxml")).load();
+    try {
+      return new FXMLLoader(App.class.getResource("/fxml/" + fxml + ".fxml")).load();
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
   /**
@@ -79,39 +84,46 @@ public class App extends Application {
    */
   @Override
   public void start(final Stage stage) throws IOException {
+    try {
+      timerTask =
+          new javafx.concurrent.Task<>() {
+            @Override
+            protected Void call() throws Exception {
+              String popupTitle;
+              String popupBody;
+              int timer = 120;
+              updateProgress(120, 120);
 
-    timerTask =
-        new javafx.concurrent.Task<>() {
-          @Override
-          protected Void call() throws Exception {
-            String popupTitle;
-            String popupBody;
-            int timer = 120;
-            updateProgress(120, 120);
+              while (timer != 0 && GameState.taskProgress != 4) {
+                Thread.sleep(1000);
+                timer--;
+                updateProgress(timer, 120);
+              }
+              if (GameState.taskProgress == 4) {
+                popupTitle = "You have escaped the room!";
+                popupBody = "Congratulations! You have escaped the room!";
 
-            while (timer != 0 && GameState.taskProgress != 4) {
-              Thread.sleep(1000);
-              timer--;
-              updateProgress(timer, 120);
+              } else {
+                popupTitle = "You ran out of time!";
+                popupBody = "You have failed to escape the room in time. Better luck next time!";
+              }
+              gameOver = true;
+              Runnable endPopup = () -> App.showDialog("Game Over", popupTitle, popupBody);
+              Platform.runLater(endPopup);
+              return null;
             }
-            if (GameState.taskProgress == 4) {
-              popupTitle = "You have escaped the room!";
-              popupBody = "Congratulations! You have escaped the room!";
-
-            } else {
-              popupTitle = "You ran out of time!";
-              popupBody = "You have failed to escape the room in time. Better luck next time!";
-            }
-            gameOver = true;
-            Runnable endPopup = () -> App.showDialog("Game Over", popupTitle, popupBody);
-            Platform.runLater(endPopup);
-            return null;
-          }
-        };
-    SceneManager.addUi(AppUi.ROOM, loadFxml("room"));
-    scene = new Scene(SceneManager.getUiRoot(AppUi.ROOM), 600, 470);
-    stage.setScene(scene);
-    stage.show();
-    SceneManager.getUiRoot(AppUi.ROOM).requestFocus();
+          };
+      SceneManager.addUi(AppUi.ROOM, loadFxml("room"));
+      scene = new Scene(SceneManager.getUiRoot(AppUi.ROOM), 600, 470);
+      stage.setScene(scene);
+      stage.show();
+      stage.setOnCloseRequest(
+          request -> {
+            System.exit(0);
+          });
+      SceneManager.getUiRoot(AppUi.ROOM).requestFocus();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }
