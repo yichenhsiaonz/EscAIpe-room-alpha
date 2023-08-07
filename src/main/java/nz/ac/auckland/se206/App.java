@@ -22,7 +22,6 @@ public class App extends Application {
 
   private static Scene scene;
   public static String firstRiddleAnswer;
-  public static String secondRiddleAnswer;
   public static javafx.concurrent.Task<Void> timerTask;
   public static TextToSpeech voice = new TextToSpeech();
   private static boolean gameOver = false;
@@ -33,7 +32,6 @@ public class App extends Application {
     keyLocationList.add("window");
     Collections.shuffle(keyLocationList);
     firstRiddleAnswer = keyLocationList.get(0);
-    secondRiddleAnswer = keyLocationList.get(1);
     launch();
   }
 

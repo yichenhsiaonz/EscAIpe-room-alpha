@@ -38,7 +38,7 @@ public class ChatController {
     try {
       chatTimer.progressProperty().bind(App.timerTask.progressProperty());
 
-      String instanceRiddleAnswer = RoomController.currentRiddleAnswer;
+      String instanceRiddleAnswer = App.firstRiddleAnswer;
       javafx.concurrent.Task<Void> promptTask =
           new javafx.concurrent.Task<>() {
             @Override
@@ -95,8 +95,7 @@ public class ChatController {
                   new javafx.concurrent.Task<>() {
                     @Override
                     protected Void call() throws Exception {
-                      String[] inputArray = result.getChatMessage().getContent().split(" ");
-                      App.voice.speak(inputArray);
+                      App.voice.speak(result.getChatMessage().getContent());
                       return null;
                     }
                   };
@@ -108,25 +107,10 @@ public class ChatController {
                     case "window":
                       popupTitle = "A small key is passed through the mail slot";
                       popupBody = "You pick it up. It's too small to fit in the door lock.";
-                      GameState.hasWindowKey = true;
                       break;
                     case "vase":
                       popupTitle = "A flower is passed through the mail slot";
                       popupBody = "You pick it up.";
-                      GameState.hasFlower = true;
-                      break;
-                  }
-                } else if (GameState.taskProgress == 1) {
-                  switch (App.secondRiddleAnswer) {
-                    case "vase":
-                      popupTitle = "A hand reaches in through the window holding a flower.";
-                      popupBody = "You take the flower.";
-                      GameState.hasFlower = true;
-                      break;
-                    case "window":
-                      popupTitle = "A second secret compartment opens up with a small key inside.";
-                      popupBody = "You take the key.";
-                      GameState.hasWindowKey = true;
                       break;
                   }
                 }

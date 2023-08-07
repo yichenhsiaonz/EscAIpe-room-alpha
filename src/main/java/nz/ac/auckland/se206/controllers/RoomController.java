@@ -20,8 +20,6 @@ public class RoomController {
   @FXML public ProgressBar roomTimer;
 
   private boolean doorGenerated = false;
-  private boolean secondGenerated = false;
-  public static String currentRiddleAnswer;
 
   /** Initializes the room view, it is called when the room loads. */
   public void initialize() {
@@ -72,7 +70,6 @@ public class RoomController {
       if (doorGenerated) {
         App.setRoot(AppUi.DOOR_CHAT);
       } else {
-        currentRiddleAnswer = App.firstRiddleAnswer;
         SceneManager.addUi(AppUi.DOOR_CHAT, App.loadFxml("chat"));
         doorGenerated = true;
         App.setRoot(AppUi.DOOR_CHAT);
@@ -82,8 +79,6 @@ public class RoomController {
     } else if (GameState.taskProgress == 1) {
       App.showDialog(
           "Info", "Find the key!", "You resolved the riddle, now you know where to go next.");
-    } else if (GameState.taskProgress == 2) {
-      App.showDialog("Info", "You've solved the second riddle!", "Now you know where the key is.");
     } else {
       GameState.taskProgress++;
       App.showDialog("Info", "You Won!", "Good Job!");
@@ -98,29 +93,13 @@ public class RoomController {
   @FXML
   public void clickVase(MouseEvent event) throws IOException {
     System.out.println("vase clicked");
-    if (GameState.hasFlower && GameState.taskProgress == 1) {
+    if (App.firstRiddleAnswer.equals("vase") && GameState.taskProgress == 1) {
       App.showDialog(
           "Info",
           "You put the flower in the vase.",
-          "A secret compartment opens with another riddle inside.");
-      if (secondGenerated) {
-        App.setRoot(AppUi.SECOND_CHAT);
-      } else {
-        currentRiddleAnswer = App.secondRiddleAnswer;
-        SceneManager.addUi(AppUi.SECOND_CHAT, App.loadFxml("chat"));
-        secondGenerated = true;
-        App.setRoot(AppUi.SECOND_CHAT);
-      }
-    } else if (App.secondRiddleAnswer.equals("vase") && GameState.taskProgress == 2) {
-      App.showDialog(
-          "Info",
-          "You put the flower in the vase.",
-          "A secret compartment opens with a larger key inside.");
+          "A secret compartment opens with a key inside.");
       GameState.taskProgress++;
-    } else if (App.firstRiddleAnswer.equals("vase") && GameState.taskProgress == 2) {
-      App.showDialog(
-          "Info", "There is nothing else in the compartment.", "You already have the small key.");
-    } else if (GameState.taskProgress == 3) {
+    } else if (GameState.taskProgress == 2) {
       App.showDialog(
           "Info", "There is nothing else in the compartment.", "You already found the key.");
     } else {
@@ -137,32 +116,13 @@ public class RoomController {
   public void clickWindow(MouseEvent event) throws IOException {
     try {
       System.out.println("window clicked");
-      if (GameState.hasWindowKey && GameState.taskProgress == 1) {
-        App.showDialog(
-            "Info",
-            "You put the small key in the keyhole.",
-            "It opens up just enough to lean out and read another riddle on the windowsill"
-                + " outside");
-        if (secondGenerated) {
-          App.setRoot(AppUi.SECOND_CHAT);
-        } else {
-          currentRiddleAnswer = App.secondRiddleAnswer;
-          SceneManager.addUi(AppUi.SECOND_CHAT, App.loadFxml("chat"));
-          secondGenerated = true;
-          App.setRoot(AppUi.SECOND_CHAT);
-        }
-      } else if (App.secondRiddleAnswer.equals("window") && GameState.taskProgress == 2) {
+      if (App.firstRiddleAnswer.equals("window") && GameState.taskProgress == 1) {
         App.showDialog(
             "Info",
             "You put the small key in the keyhole.",
             "It opens up just enough to lean out and grab a larger key on the windowsill outside.");
         GameState.taskProgress++;
-      } else if (App.firstRiddleAnswer.equals("window") && GameState.taskProgress == 2) {
-        App.showDialog(
-            "Info",
-            "The opening isn't large enough to reach anything else.",
-            "You already have the flower.");
-      } else if (GameState.taskProgress == 3) {
+      } else if (App.firstRiddleAnswer.equals("window") && GameState.hasDoorKey) {
         App.showDialog(
             "Info",
             "The opening isn't large enough to reach anything else.",
