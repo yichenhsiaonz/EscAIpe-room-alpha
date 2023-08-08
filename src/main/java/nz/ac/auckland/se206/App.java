@@ -12,7 +12,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 import nz.ac.auckland.se206.SceneManager.AppUi;
-import nz.ac.auckland.se206.speech.TextToSpeech;
 
 /**
  * This is the entry point of the JavaFX application, while you can change this class, it should
@@ -23,8 +22,7 @@ public class App extends Application {
   private static Scene scene;
   public static String firstRiddleAnswer;
   public static javafx.concurrent.Task<Void> timerTask;
-  public static TextToSpeech voice = new TextToSpeech();
-  private static boolean gameOver = false;
+  private static boolean won = false;
 
   public static void main(final String[] args) {
     List<String> keyLocationList = new ArrayList<String>();
@@ -69,9 +67,6 @@ public class App extends Application {
     alert.setHeaderText(headerText);
     alert.setContentText(message);
     alert.showAndWait();
-    if (gameOver) {
-      System.exit(0);
-    }
   }
 
   /**
@@ -92,22 +87,33 @@ public class App extends Application {
               int timer = 120;
               updateProgress(120, 120);
 
-              while (timer != 0 && GameState.taskProgress != 4) {
+              while (timer != 0 && GameState.taskProgress != 3) {
                 Thread.sleep(1000);
                 timer--;
                 updateProgress(timer, 120);
               }
-              if (GameState.taskProgress == 4) {
+              if (GameState.taskProgress == 3) {
                 popupTitle = "You have escaped the room!";
                 popupBody = "Congratulations! You have escaped the room!";
+                won = true;
 
               } else {
                 popupTitle = "You ran out of time!";
                 popupBody = "You have failed to escape the room in time. Better luck next time!";
               }
-              gameOver = true;
-              Runnable endPopup = () -> App.showDialog("Game Over", popupTitle, popupBody);
+              Runnable endPopup = () -> showDialog("Game Over", popupTitle, popupBody);
+              Runnable endWindow =
+                  () -> {
+                    try {
+                      SceneManager.addUi(AppUi.END, loadFxml("end"));
+                      setRoot(AppUi.END);
+                    } catch (IOException e) {
+                      // TODO Auto-generated catch block
+                      e.printStackTrace();
+                    }
+                  };
               Platform.runLater(endPopup);
+              Platform.runLater(endWindow);
               return null;
             }
           };
@@ -123,5 +129,9 @@ public class App extends Application {
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  public static boolean getWon() {
+    return won;
   }
 }

@@ -17,6 +17,7 @@ import nz.ac.auckland.se206.gpt.openai.ApiProxyException;
 import nz.ac.auckland.se206.gpt.openai.ChatCompletionRequest;
 import nz.ac.auckland.se206.gpt.openai.ChatCompletionResult;
 import nz.ac.auckland.se206.gpt.openai.ChatCompletionResult.Choice;
+import nz.ac.auckland.se206.speech.TextToSpeech;
 
 /** Controller class for the chat view. */
 public class ChatController {
@@ -26,6 +27,7 @@ public class ChatController {
   @FXML private ProgressBar chatTimer;
   private String popupTitle;
   private String popupBody;
+  private TextToSpeech voice = new TextToSpeech();
   private ChatCompletionRequest chatCompletionRequest;
 
   /**
@@ -91,15 +93,18 @@ public class ChatController {
               Runnable addGptMessage = () -> appendChatMessage(result.getChatMessage());
               sendButton.setDisable(false);
               Platform.runLater(addGptMessage);
+
               javafx.concurrent.Task<Void> readMessageTask =
                   new javafx.concurrent.Task<>() {
                     @Override
                     protected Void call() throws Exception {
-                      App.voice.speak(result.getChatMessage().getContent());
+                      voice.speak(result.getChatMessage().getContent());
                       return null;
                     }
                   };
+
               new Thread(readMessageTask).start();
+
               if (result.getChatMessage().getRole().equals("assistant")
                   && result.getChatMessage().getContent().startsWith("Correct")) {
                 if (GameState.taskProgress == 0) {

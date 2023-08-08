@@ -3,9 +3,9 @@ package nz.ac.auckland.se206.controllers;
 import java.io.IOException;
 import javafx.fxml.FXML;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.shape.Rectangle;
 import nz.ac.auckland.se206.App;
 import nz.ac.auckland.se206.GameState;
 import nz.ac.auckland.se206.SceneManager;
@@ -14,9 +14,15 @@ import nz.ac.auckland.se206.SceneManager.AppUi;
 /** Controller class for the room view. */
 public class RoomController {
 
-  @FXML private Rectangle door;
-  @FXML private Rectangle window;
-  @FXML private Rectangle vase;
+  @FXML private ImageView door;
+  @FXML private ImageView doorGlow;
+  @FXML private ImageView window;
+  @FXML private ImageView windowGlow;
+  @FXML private ImageView frameOpen;
+  @FXML private ImageView frameClosed;
+  @FXML private ImageView vase;
+  @FXML private ImageView vaseGlow;
+  @FXML private ImageView flower;
   @FXML public ProgressBar roomTimer;
 
   private boolean doorGenerated = false;
@@ -65,8 +71,8 @@ public class RoomController {
     if (GameState.taskProgress == 0) {
       App.showDialog(
           "Info",
-          "A riddle is written on a note taped to the door.",
-          "You need to resolve the riddle!");
+          "You jiggle the door handle, but it's locked.",
+          "A loud voice booms from the door: \"Solve this riddle to escape!\"");
       if (doorGenerated) {
         App.setRoot(AppUi.DOOR_CHAT);
       } else {
@@ -81,7 +87,6 @@ public class RoomController {
           "Info", "Find the key!", "You resolved the riddle, now you know where to go next.");
     } else {
       GameState.taskProgress++;
-      App.showDialog("Info", "You Won!", "Good Job!");
     }
   }
 
@@ -94,14 +99,17 @@ public class RoomController {
   public void clickVase(MouseEvent event) throws IOException {
     System.out.println("vase clicked");
     if (App.firstRiddleAnswer.equals("vase") && GameState.taskProgress == 1) {
+      flower.setVisible(true);
       App.showDialog(
           "Info",
           "You put the flower in the vase.",
           "A secret compartment opens with a key inside.");
       GameState.taskProgress++;
-    } else if (GameState.taskProgress == 2) {
+    } else if (App.firstRiddleAnswer.equals("vase") && GameState.taskProgress == 2) {
       App.showDialog(
           "Info", "There is nothing else in the compartment.", "You already found the key.");
+    } else if (App.firstRiddleAnswer.equals("window") && GameState.taskProgress == 2) {
+      App.showDialog("Info", "Nothing happens.", "You already found the key.");
     } else {
       App.showDialog("Info", "Nothing happens.", " The vase is empty.");
     }
@@ -117,21 +125,55 @@ public class RoomController {
     try {
       System.out.println("window clicked");
       if (App.firstRiddleAnswer.equals("window") && GameState.taskProgress == 1) {
+        frameClosed.setVisible(false);
+        frameOpen.setVisible(true);
         App.showDialog(
             "Info",
             "You put the small key in the keyhole.",
             "It opens up just enough to lean out and grab a larger key on the windowsill outside.");
         GameState.taskProgress++;
-      } else if (App.firstRiddleAnswer.equals("window") && GameState.hasDoorKey) {
+      } else if (App.firstRiddleAnswer.equals("window") && GameState.taskProgress == 2) {
         App.showDialog(
             "Info",
             "The opening isn't large enough to reach anything else.",
             "You already found the key.");
+      } else if (App.firstRiddleAnswer.equals("vase") && GameState.taskProgress == 2) {
+        App.showDialog("Info", "Nothing happens.", "You already found the key.");
       } else {
         App.showDialog("Info", "Nothing happens.", " There is a small keyhole on the window.");
       }
     } catch (Exception e) {
       System.out.println(e);
     }
+  }
+
+  @FXML
+  public void doorHovered(MouseEvent event) {
+    doorGlow.setVisible(true);
+  }
+
+  @FXML
+  public void doorUnhovered(MouseEvent event) {
+    doorGlow.setVisible(false);
+  }
+
+  @FXML
+  public void windowHovered(MouseEvent event) {
+    windowGlow.setVisible(true);
+  }
+
+  @FXML
+  public void windowUnhovered(MouseEvent event) {
+    windowGlow.setVisible(false);
+  }
+
+  @FXML
+  public void vaseHovered(MouseEvent event) {
+    vaseGlow.setVisible(true);
+  }
+
+  @FXML
+  public void vaseUnhovered(MouseEvent event) {
+    vaseGlow.setVisible(false);
   }
 }
