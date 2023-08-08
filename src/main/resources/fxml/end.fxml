@@ -13,8 +13,8 @@
             <Font name="Arial" size="20.0" />
          </font>
       </Label>
-      <Button fx:id="generateEndingButton" layoutX="240.0" layoutY="116.0" mnemonicParsing="false" onAction="#clickEnding" text="Find out your fate..." />
+      <Button fx:id="generateEndingButton" layoutX="240.0" layoutY="116.0" mnemonicParsing="false" onAction="#onClickEnding" text="Find out your fate..." />
       <TextArea fx:id="endingBox" editable="false" layoutX="67.0" layoutY="203.0" prefHeight="200.0" prefWidth="465.0" wrapText="true" />
-      <Button fx:id="quitButton" layoutX="540.0" layoutY="431.0" mnemonicParsing="false" onAction="#clickQuit" text="Quit" />
+      <Button fx:id="quitButton" layoutX="540.0" layoutY="431.0" mnemonicParsing="false" onAction="#onClickQuit" text="Quit" />
    </children>
 </Pane>
