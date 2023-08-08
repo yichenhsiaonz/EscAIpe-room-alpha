@@ -2,13 +2,12 @@ package nz.ac.auckland.se206.controllers;
 
 import java.io.IOException;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.MouseEvent;
 import nz.ac.auckland.se206.App;
-import nz.ac.auckland.se206.gpt.ChatMessage;
 import nz.ac.auckland.se206.gpt.openai.ApiProxyException;
 import nz.ac.auckland.se206.gpt.openai.ChatCompletionRequest;
 import nz.ac.auckland.se206.gpt.openai.ChatCompletionResult;
@@ -27,6 +26,9 @@ public class EndController {
   @FXML
   public void initialize() {
     // Initialization code goes here
+
+    // set the title based on whether the user won or lost
+    // set the prompt based on whether the user won or lost
     if (App.getWon()) {
       title.setText("You have escaped the room!");
       endPrompt =
@@ -40,45 +42,34 @@ public class EndController {
   }
 
   @FXML
-  private void quitGame(ActionEvent event) {
+  private void quitGame(MouseEvent event) {
     System.exit(0);
   }
 
   @FXML
-  private void generateEnding(ActionEvent event) throws ApiProxyException, IOException {
+  private void generateEnding(MouseEvent event) throws ApiProxyException, IOException {
+    // disable the button so user can't generate multiple endings
+    generateEndingButton.setDisable(true);
     try {
       javafx.concurrent.Task<Void> promptTask =
           new javafx.concurrent.Task<>() {
             @Override
-            protected Void call() throws Exception {
+            protected Void call() throws IOException, ApiProxyException {
+              // generate a new gpt session as user may run out of time before opening the chat
+              // window
+              // use prompt based on whether the user won or lost
               chatCompletionRequest =
                   new ChatCompletionRequest()
                       .setN(1)
                       .setTemperature(0.2)
                       .setTopP(0.5)
                       .setMaxTokens(200);
-              runGpt(new ChatMessage("user", endPrompt));
-              return null;
-            }
-          };
-      new Thread(promptTask).start();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
 
-  private void runGpt(ChatMessage prompt) throws ApiProxyException, IOException {
-    generateEndingButton.setDisable(true);
-    chatCompletionRequest.addMessage(prompt);
-    try {
-      javafx.concurrent.Task<Void> sendTask =
-          new javafx.concurrent.Task<>() {
-            @Override
-            protected Void call() throws Exception {
+              chatCompletionRequest.addMessage("user", endPrompt);
               ChatCompletionResult chatCompletionResult = chatCompletionRequest.execute();
               Choice result = chatCompletionResult.getChoices().iterator().next();
-              chatCompletionRequest.addMessage(result.getChatMessage());
 
+              // add the gpt message to the text area on the main thread
               Runnable addGptMessage =
                   () -> endingBox.appendText(result.getChatMessage().getContent());
               Platform.runLater(addGptMessage);
@@ -86,20 +77,19 @@ public class EndController {
                   new javafx.concurrent.Task<>() {
                     @Override
                     protected Void call() throws Exception {
+                      // read the message out loud on a background thread
                       voice.speak(result.getChatMessage().getContent());
                       return null;
                     }
                   };
 
               new Thread(readMessageTask).start();
-
               return null;
             }
           };
-      new Thread(sendTask).start();
-
+      // run the task in a background thread
+      new Thread(promptTask).start();
     } catch (Exception e) {
-      // TODO handle exception appropriately
       e.printStackTrace();
     }
   }

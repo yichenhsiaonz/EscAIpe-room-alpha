@@ -69,6 +69,10 @@ public class App extends Application {
     alert.showAndWait();
   }
 
+  public static boolean getWon() {
+    return won;
+  }
+
   /**
    * This method is invoked when the application starts. It loads and shows the "Canvas" scene.
    *
@@ -78,30 +82,42 @@ public class App extends Application {
   @Override
   public void start(final Stage stage) throws IOException {
     try {
+
+      // create timer task to run in background persistently
       timerTask =
           new javafx.concurrent.Task<>() {
             @Override
             protected Void call() throws Exception {
               String popupTitle;
               String popupBody;
+
+              // set time to 120 seconds, update progress bar and decrease timer by one second every
+              // second.
               int timer = 120;
               updateProgress(120, 120);
+
+              // end upon victory or time up
 
               while (timer != 0 && GameState.taskProgress != 3) {
                 Thread.sleep(1000);
                 timer--;
                 updateProgress(timer, 120);
               }
+
               if (GameState.taskProgress == 3) {
+                // victory text
                 popupTitle = "You have escaped the room!";
                 popupBody = "Congratulations! You have escaped the room!";
                 won = true;
 
               } else {
+                // failure text
                 popupTitle = "You ran out of time!";
                 popupBody = "You have failed to escape the room in time. Better luck next time!";
               }
+              // create alert on main thread
               Runnable endPopup = () -> showDialog("Game Over", popupTitle, popupBody);
+              // create end window instance and switch to it on main thread
               Runnable endWindow =
                   () -> {
                     try {
@@ -117,10 +133,14 @@ public class App extends Application {
               return null;
             }
           };
+
+      // generate the room and add it to the scene manager to allow for switching between chat
+      // window and room without resetting
       SceneManager.addUi(AppUi.ROOM, loadFxml("room"));
       scene = new Scene(SceneManager.getUiRoot(AppUi.ROOM), 600, 470);
       stage.setScene(scene);
       stage.show();
+      // end the program fully upon closing window
       stage.setOnCloseRequest(
           request -> {
             System.exit(0);
@@ -129,9 +149,5 @@ public class App extends Application {
     } catch (Exception e) {
       e.printStackTrace();
     }
-  }
-
-  public static boolean getWon() {
-    return won;
   }
 }

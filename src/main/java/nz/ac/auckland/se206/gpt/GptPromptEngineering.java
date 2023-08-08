@@ -10,6 +10,7 @@ public class GptPromptEngineering {
    * @return the generated prompt engineering string
    */
   public static String getRiddleWithGivenWord(String wordToGuess) {
+    // String that will be passed to chatGPT as a prompt
     String prompt =
         "You are the AI of an escape room. Tell me a riddle with the answer \""
             + wordToGuess

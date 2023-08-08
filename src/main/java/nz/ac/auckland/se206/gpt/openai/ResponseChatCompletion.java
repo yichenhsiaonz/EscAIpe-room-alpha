@@ -1,12 +1,11 @@
 package nz.ac.auckland.se206.gpt.openai;
 
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
- public class ResponseChatCompletion {
+public class ResponseChatCompletion {
 
   public final Boolean success;
   public final Integer code;
