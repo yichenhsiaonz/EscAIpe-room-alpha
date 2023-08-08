@@ -42,12 +42,12 @@ public class EndController {
   }
 
   @FXML
-  private void quitGame(MouseEvent event) {
+  private void clickQuit(MouseEvent event) {
     System.exit(0);
   }
 
   @FXML
-  private void generateEnding(MouseEvent event) throws ApiProxyException, IOException {
+  private void clickEnding(MouseEvent event) throws ApiProxyException, IOException {
     // disable the button so user can't generate multiple endings
     generateEndingButton.setDisable(true);
     try {
