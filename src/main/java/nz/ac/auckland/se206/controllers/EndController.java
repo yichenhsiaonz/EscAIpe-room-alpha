@@ -1,27 +1,23 @@
 package nz.ac.auckland.se206.controllers;
 
 import java.io.IOException;
-import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.input.MouseEvent;
 import nz.ac.auckland.se206.App;
+import nz.ac.auckland.se206.GptManager;
+import nz.ac.auckland.se206.gpt.ChatMessage;
 import nz.ac.auckland.se206.gpt.openai.ApiProxyException;
-import nz.ac.auckland.se206.gpt.openai.ChatCompletionRequest;
-import nz.ac.auckland.se206.gpt.openai.ChatCompletionResult;
-import nz.ac.auckland.se206.gpt.openai.ChatCompletionResult.Choice;
-import nz.ac.auckland.se206.speech.TextToSpeech;
 
 public class EndController {
   @FXML private Label title;
   @FXML private Button generateEndingButton;
   @FXML private Button quitButton;
   @FXML private TextArea endingBox;
-  private ChatCompletionRequest chatCompletionRequest;
-  private TextToSpeech voice = new TextToSpeech();
   private String endPrompt;
+  private GptManager gptManager;
 
   @FXML
   public void initialize() {
@@ -32,63 +28,40 @@ public class EndController {
     if (App.getWon()) {
       title.setText("You have escaped the room!");
       endPrompt =
-          "The user has escaped an escape room. Write a short, one paragraph ending for them.";
+          "The user has escaped an escape room. Write a short, three sentence ending for them.";
     } else {
       title.setText("You have failed to escape the room!");
       endPrompt =
-          "The user has failed to escape an escape room. Write a short, one paragraph ending for"
+          "The user has failed to escape an escape room. Write a short, three sentence ending for"
               + " them.";
     }
   }
 
   @FXML
-  private void onClickQuit(MouseEvent event) {
+  private void onClickQuit(ActionEvent event) {
     System.exit(0);
   }
 
   @FXML
-  private void onClickEnding(MouseEvent event) throws ApiProxyException, IOException {
+  private void onClickEnding(ActionEvent event) throws ApiProxyException, IOException {
     // disable the button so user can't generate multiple endings
     generateEndingButton.setDisable(true);
     try {
+      gptManager = new GptManager(endingBox);
+      // start the chat as a task
       javafx.concurrent.Task<Void> promptTask =
           new javafx.concurrent.Task<>() {
             @Override
-            protected Void call() throws IOException, ApiProxyException {
-              // generate a new gpt session as user may run out of time before opening the chat
-              // window
-              // use prompt based on whether the user won or lost
-              chatCompletionRequest =
-                  new ChatCompletionRequest()
-                      .setN(1)
-                      .setTemperature(0.2)
-                      .setTopP(0.5)
-                      .setMaxTokens(200);
-
-              chatCompletionRequest.addMessage("user", endPrompt);
-              ChatCompletionResult chatCompletionResult = chatCompletionRequest.execute();
-              Choice result = chatCompletionResult.getChoices().iterator().next();
-
-              // add the gpt message to the text area on the main thread
-              Runnable addGptMessage =
-                  () -> endingBox.appendText(result.getChatMessage().getContent());
-              Platform.runLater(addGptMessage);
-              javafx.concurrent.Task<Void> readMessageTask =
-                  new javafx.concurrent.Task<>() {
-                    @Override
-                    protected Void call() throws Exception {
-                      // read the message out loud on a background thread
-                      voice.speak(result.getChatMessage().getContent());
-                      return null;
-                    }
-                  };
-
-              new Thread(readMessageTask).start();
+            protected Void call() throws Exception {
+              ChatMessage ending = gptManager.runGpt(endPrompt);
+              // append the riddle to the chat text area
+              gptManager.addMessage("", ending);
               return null;
             }
           };
-      // run the task in a background thread
+      // begin running the task on a background thread
       new Thread(promptTask).start();
+      // run the task in a background thread
     } catch (Exception e) {
       e.printStackTrace();
     }

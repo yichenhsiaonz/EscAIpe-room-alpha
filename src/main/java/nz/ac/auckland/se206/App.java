@@ -137,8 +137,9 @@ public class App extends Application {
       // generate the room and add it to the scene manager to allow for switching between chat
       // window and room without resetting
       SceneManager.addUi(AppUi.ROOM, loadFxml("room"));
-      scene = new Scene(SceneManager.getUiRoot(AppUi.ROOM), 600, 470);
+      scene = new Scene(SceneManager.getUiRoot(AppUi.ROOM), 850, 470);
       stage.setScene(scene);
+      stage.setResizable(false);
       stage.show();
       // end the program fully upon closing window
       stage.setOnCloseRequest(
