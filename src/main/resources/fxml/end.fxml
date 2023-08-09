@@ -6,15 +6,15 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<Pane fx:id="room" focusTraversable="true" prefHeight="470.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nz.ac.auckland.se206.controllers.EndController">
+<Pane fx:id="room" focusTraversable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="470.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nz.ac.auckland.se206.controllers.EndController">
    <children>
-      <Label fx:id="title" layoutX="30.0" layoutY="24.0" prefHeight="41.0" prefWidth="549.0" text="Game Over!" textAlignment="CENTER">
+      <Label fx:id="title" layoutX="16.0" layoutY="14.0" prefHeight="41.0" prefWidth="818.0" text="Game Over!" textAlignment="CENTER">
          <font>
-            <Font name="Arial" size="20.0" />
+            <Font name="Arial" size="30.0" />
          </font>
       </Label>
-      <Button fx:id="generateEndingButton" layoutX="240.0" layoutY="116.0" mnemonicParsing="false" onAction="#onClickEnding" text="Find out your fate..." />
-      <TextArea fx:id="endingBox" editable="false" layoutX="67.0" layoutY="203.0" prefHeight="200.0" prefWidth="465.0" wrapText="true" />
-      <Button fx:id="quitButton" layoutX="540.0" layoutY="431.0" mnemonicParsing="false" onAction="#onClickQuit" text="Quit" />
+      <Button fx:id="generateEndingButton" layoutX="366.0" layoutY="96.0" mnemonicParsing="false" onAction="#onClickEnding" text="Find out your fate..." />
+      <TextArea fx:id="endingBox" editable="false" layoutX="130.0" layoutY="141.0" prefHeight="241.0" prefWidth="591.0" wrapText="true" />
+      <Button fx:id="quitButton" layoutX="797.0" layoutY="431.0" mnemonicParsing="false" onAction="#onClickQuit" text="Quit" />
    </children>
 </Pane>

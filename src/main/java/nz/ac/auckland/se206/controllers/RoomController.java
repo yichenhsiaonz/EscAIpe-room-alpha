@@ -1,15 +1,21 @@
 package nz.ac.auckland.se206.controllers;
 
 import java.io.IOException;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.shape.Rectangle;
 import nz.ac.auckland.se206.App;
 import nz.ac.auckland.se206.GameState;
+import nz.ac.auckland.se206.GptManager;
 import nz.ac.auckland.se206.SceneManager;
 import nz.ac.auckland.se206.SceneManager.AppUi;
+import nz.ac.auckland.se206.gpt.ChatMessage;
 
 /** Controller class for the room view. */
 public class RoomController {
@@ -24,11 +30,18 @@ public class RoomController {
   @FXML private ImageView vaseGlow;
   @FXML private ImageView flower;
   @FXML private ProgressBar roomTimer;
+  @FXML private ProgressBar loadingBar;
+  @FXML private Label timerLabel;
+  @FXML private TextArea notificationsBox;
+  @FXML private Rectangle blackoutRectangle;
 
+  private boolean windowDescribed = false;
+  private boolean vaseDescribed = false;
+  private GptManager gptManager;
   private boolean chatGenerated = false;
 
   /** Initializes the room view, it is called when the room loads. */
-  public void initialize() {
+  public void initialize() throws IOException {
     // Initialization code goes here
     App.showDialog(
         "Info",
@@ -36,6 +49,15 @@ public class RoomController {
         "Maybe they left the door unlocked. Try clicking on it.");
     new Thread(App.timerTask).start();
     roomTimer.progressProperty().bind(App.timerTask.progressProperty());
+    notificationsBox.appendText("\n\n");
+
+    try {
+      gptManager = new GptManager(notificationsBox);
+      // start the chat as a task
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -70,13 +92,15 @@ public class RoomController {
     // Either switch to the chat window or show a popup with different text depending on game state
     if (GameState.taskProgress == 0) {
       // switch to chat window
+      gptManager.readMessage("Solve this riddle to escape!");
       App.showDialog(
           "Info",
           "You jiggle the door handle, but it's locked.",
-          "A loud voice booms from the door: \"Solve this riddle to escape!\"");
+          "A robotic voice buzzed through the intercom: \"Solve this riddle to escape!\"");
       if (chatGenerated) {
         // chat window has already been generated, just switch to it
         App.setRoot(AppUi.DOOR_CHAT);
+        ;
       } else {
         // chat window has not been generated, generate it and switch to it
         SceneManager.addUi(AppUi.DOOR_CHAT, App.loadFxml("chat"));
@@ -107,10 +131,10 @@ public class RoomController {
     if (App.firstRiddleAnswer.equals("vase") && GameState.taskProgress == 1) {
       // put the flower in the vase and give user the door key
       flower.setVisible(true);
-      App.showDialog(
-          "Info",
-          "You put the flower in the vase.",
-          "A secret compartment opens with a key inside.");
+      getNotification(
+          "Vase",
+          "Describe the user putting a flower into the vase and a secret compartment opening with a"
+              + " key inside in two short sentences");
       GameState.taskProgress++;
     } else if (App.firstRiddleAnswer.equals("vase") && GameState.taskProgress == 2) {
       // door key was in vase and user has door key
@@ -121,7 +145,12 @@ public class RoomController {
       App.showDialog("Info", "Nothing happens.", "You already found the key.");
     } else {
       // user has not solved riddle yet
-      App.showDialog("Info", "Nothing happens.", " The vase is empty.");
+      if (!vaseDescribed) {
+        getNotification("Vase", "Describe a blue vase that is empy in two short sentences");
+        vaseDescribed = true;
+      } else {
+        App.showDialog("Info", "Nothing happens.", " The vase is empty.");
+      }
     }
   }
 
@@ -139,10 +168,10 @@ public class RoomController {
         // open the window and give user the door key
         frameClosed.setVisible(false);
         frameOpen.setVisible(true);
-        App.showDialog(
-            "Info",
-            "You put the small key in the keyhole.",
-            "It opens up just enough to lean out and grab a larger key on the windowsill outside.");
+        getNotification(
+            "Window",
+            "Describe the user opening the window with a small key and grabbing a larger key on the"
+                + " windowsill outside in two short sentences");
         GameState.taskProgress++;
       } else if (App.firstRiddleAnswer.equals("window") && GameState.taskProgress == 2) {
         // door key was in window and user has door key
@@ -155,7 +184,13 @@ public class RoomController {
         App.showDialog("Info", "Nothing happens.", "You already found the key.");
       } else {
         // user has not solved riddle yet
-        App.showDialog("Info", "Nothing happens.", " There is a small keyhole on the window.");
+        if (!windowDescribed) {
+          getNotification(
+              "Window", "Describe a window to the outside with a small keyhole in it in two short sentences");
+          windowDescribed = true;
+        } else {
+          App.showDialog("Info", "Nothing happens.", " There is a small keyhole on the window.");
+        }
       }
     } catch (Exception e) {
       System.out.println(e);
@@ -190,5 +225,38 @@ public class RoomController {
   @FXML
   public void vaseUnhovered(MouseEvent event) {
     vaseGlow.setVisible(false);
+  }
+
+  private void getNotification(String Source, String prompt) throws IOException {
+    try {
+      blackoutRectangle.setVisible(true);
+      loadingBar.setVisible(true);
+      loadingBar.setProgress(ProgressBar.INDETERMINATE_PROGRESS);
+      // start the chat as a task
+      javafx.concurrent.Task<Void> promptTask =
+          new javafx.concurrent.Task<>() {
+            @Override
+            protected Void call() throws Exception {
+              ChatMessage notification = gptManager.runGpt(prompt);
+              Runnable updater =
+                  () -> {
+                    try {
+                      blackoutRectangle.setVisible(false);
+                      loadingBar.setVisible(false);
+                      gptManager.addMessage("[Clicked on " + Source + "]\n\n", notification);
+                    } catch (Exception e) {
+                      e.printStackTrace();
+                    }
+                  };
+              Platform.runLater(updater);
+              return null;
+            }
+          };
+      // begin running the task on a background thread
+      new Thread(promptTask).start();
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }

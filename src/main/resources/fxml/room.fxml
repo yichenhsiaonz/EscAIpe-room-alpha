@@ -3,12 +3,14 @@
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<Pane fx:id="room" focusTraversable="true" onKeyPressed="#onKeyPressed" onKeyReleased="#onKeyReleased" prefHeight="470.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nz.ac.auckland.se206.controllers.RoomController">
+<Pane fx:id="room" focusTraversable="true" maxHeight="470.0" maxWidth="850.0" minHeight="470.0" minWidth="850.0" onKeyPressed="#onKeyPressed" onKeyReleased="#onKeyReleased" prefHeight="470.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nz.ac.auckland.se206.controllers.RoomController">
    <children>
       <ImageView fitHeight="378.0" fitWidth="494.0" layoutX="54.0" layoutY="76.0">
          <image>
@@ -74,6 +76,10 @@
             <Font name="Arial" size="35.0" />
          </font>
       </Label>
-      <ProgressBar fx:id="roomTimer" layoutX="200.0" layoutY="5.0" prefWidth="200.0" progress="1.0" />
+      <ProgressBar fx:id="roomTimer" layoutX="325.0" layoutY="5.0" prefWidth="200.0" progress="1.0" />
+      <Label layoutX="270.0" layoutY="4.0" text="2 minutes" />
+      <TextArea fx:id="notificationsBox" editable="false" layoutX="579.0" layoutY="32.0" prefHeight="406.0" prefWidth="247.0" text="Notifications:" wrapText="true" />
+      <Rectangle fx:id="blackoutRectangle" arcHeight="5.0" arcWidth="5.0" fill="#000000a2" height="470.0" stroke="#0000004b" strokeType="INSIDE" visible="false" width="850.0" />
+      <ProgressBar fx:id="loadingBar" layoutX="325.0" layoutY="226.0" prefWidth="200.0" progress="0.0" visible="false" />
    </children>
 </Pane>
