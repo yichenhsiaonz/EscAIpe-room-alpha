@@ -12,10 +12,11 @@ import nz.ac.auckland.se206.gpt.openai.ChatCompletionResult.Choice;
 import nz.ac.auckland.se206.speech.TextToSpeech;
 
 public class GptManager {
+  private static TextToSpeech voice = new TextToSpeech();
 
   @FXML private TextArea outputBox;
   private ChatCompletionRequest chatCompletionRequest;
-  private static TextToSpeech voice = new TextToSpeech();
+  
 
   public GptManager(TextArea outputBox) throws IOException {
     try {

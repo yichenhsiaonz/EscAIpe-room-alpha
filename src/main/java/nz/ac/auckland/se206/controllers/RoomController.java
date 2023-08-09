@@ -186,7 +186,8 @@ public class RoomController {
         // user has not solved riddle yet
         if (!windowDescribed) {
           getNotification(
-              "Window", "Describe a window to the outside with a small keyhole in it in two short sentences");
+              "Window",
+              "Describe a window to the outside with a small keyhole in it in two short sentences");
           windowDescribed = true;
         } else {
           App.showDialog("Info", "Nothing happens.", " There is a small keyhole on the window.");
@@ -227,7 +228,7 @@ public class RoomController {
     vaseGlow.setVisible(false);
   }
 
-  private void getNotification(String Source, String prompt) throws IOException {
+  private void getNotification(String source, String prompt) throws IOException {
     try {
       blackoutRectangle.setVisible(true);
       loadingBar.setVisible(true);
@@ -243,7 +244,7 @@ public class RoomController {
                     try {
                       blackoutRectangle.setVisible(false);
                       loadingBar.setVisible(false);
-                      gptManager.addMessage("[Clicked on " + Source + "]\n\n", notification);
+                      gptManager.addMessage("[Clicked on " + source + "]\n\n", notification);
                     } catch (Exception e) {
                       e.printStackTrace();
                     }
