@@ -13,7 +13,7 @@ public class GptPromptEngineering {
     // String that will be passed to chatGPT as a prompt
     String prompt =
         // premise
-        "You are the AI of an escape room. Tell me a riddle with the answer \""
+        "You are the AI of an escape room. Write a riddle with the answer \""
             + wordToGuess
             + "\".\n\n"
             // prevent the AI from using the answer

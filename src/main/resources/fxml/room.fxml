@@ -58,10 +58,13 @@
             <Image url="@../images/vaseglow.png" />
          </image>
          <cursor>
-            <Cursor fx:constant="HAND" />
+            <Cursor fx:constant="DEFAULT" />
          </cursor>
       </ImageView>
       <ImageView fx:id="vase" fitHeight="378.0" fitWidth="494.0" layoutX="54.0" layoutY="76.0" onMouseClicked="#clickVase" onMouseEntered="#vaseHovered" onMouseExited="#vaseUnhovered">
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
          <image>
             <Image url="@../images/vase.png" />
          </image>
@@ -77,9 +80,12 @@
          </font>
       </Label>
       <ProgressBar fx:id="roomTimer" layoutX="325.0" layoutY="5.0" prefWidth="200.0" progress="1.0" />
-      <Label layoutX="270.0" layoutY="4.0" text="2 minutes" />
-      <TextArea fx:id="notificationsBox" editable="false" layoutX="579.0" layoutY="32.0" prefHeight="406.0" prefWidth="247.0" text="Notifications:" wrapText="true" />
-      <Rectangle fx:id="blackoutRectangle" arcHeight="5.0" arcWidth="5.0" fill="#000000a2" height="470.0" stroke="#0000004b" strokeType="INSIDE" visible="false" width="850.0" />
-      <ProgressBar fx:id="loadingBar" layoutX="325.0" layoutY="226.0" prefWidth="200.0" progress="0.0" visible="false" />
+      <Label fx:id="timerLabel" layoutX="527.0" layoutY="4.0" text="2 minutes" />
+      <TextArea fx:id="notificationsBox" editable="false" layoutX="579.0" layoutY="32.0" prefHeight="406.0" prefWidth="247.0" text="Notifications:" wrapText="true">
+         <cursor>
+            <Cursor fx:constant="DEFAULT" />
+         </cursor></TextArea>
+      <Rectangle fx:id="blackoutRectangle" arcHeight="5.0" arcWidth="5.0" fill="#000000a2" height="406.0" layoutX="579.0" layoutY="32.0" stroke="#0000004b" strokeType="INSIDE" visible="false" width="247.0" />
+      <ProgressBar fx:id="loadingBar" layoutX="603.0" layoutY="226.0" prefWidth="200.0" progress="0.0" visible="false" />
    </children>
 </Pane>

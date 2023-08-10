@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -22,6 +23,7 @@ public class ChatController {
   @FXML private TextField inputText;
   @FXML private Button sendButton;
   @FXML private ProgressBar chatTimer;
+  @FXML private Label timerLabel;
   private GptManager gptManager;
   private String popupTitle;
   private String popupBody;
@@ -34,6 +36,7 @@ public class ChatController {
   @FXML
   public void initialize() throws IOException, ApiProxyException {
     try {
+      timerLabel.textProperty().bind(App.timerTask.messageProperty());
       chatTimer.progressProperty().bind(App.timerTask.progressProperty());
       gptManager = new GptManager(chatTextArea);
       // start the chat as a task
@@ -47,7 +50,7 @@ public class ChatController {
               // read the riddle out loud
               gptManager.readMessage(initialRiddle.getContent());
               // add the riddle to the chat text area
-              gptManager.addMessage(initialRiddle.getRole(), initialRiddle);
+              gptManager.addMessage("assistant: ", initialRiddle);
               Runnable enableButtonTask =
                   () -> {
                     // append the riddle to the chat text area
@@ -107,12 +110,22 @@ public class ChatController {
                 // if the response is correct, show a popup and progress the game
                 if (result.getRole().equals("assistant")
                     && result.getContent().startsWith("Correct")) {
+                  GameState.taskProgress++;
                   switch (App.firstRiddleAnswer) {
                     case "window":
+                      RoomController.instance.getNotification(
+                          "Door",
+                          "Describe a small key being passed through from the other side the mail"
+                              + " slot of the door in two short sentences. The key is too small to"
+                              + " fir in the lock of the door");
                       popupTitle = "A small key is passed through the mail slot";
                       popupBody = "You pick it up. It's too small to fit in the door lock.";
                       break;
                     case "vase":
+                      RoomController.instance.getNotification(
+                          "Door",
+                          "Describe a flower being passed through the mail slot from the other side"
+                              + " of the door in two short sentences");
                       popupTitle = "A flower is passed through the mail slot";
                       popupBody = "You pick it up.";
                       break;
@@ -122,7 +135,6 @@ public class ChatController {
                   App.setRoot(AppUi.ROOM);
 
                   Platform.runLater(successPopup);
-                  GameState.taskProgress++;
                 } else {
                   // read the response out loud on a background thread
                   gptManager.readMessage(result.getContent());

@@ -93,7 +93,8 @@ public class App extends Application {
 
               // set time to 120 seconds, update progress bar and decrease timer by one second every
               // second.
-              int timer = 120;
+              Integer timer = 120;
+              updateMessage("2:00");
               updateProgress(120, 120);
 
               // end upon victory or time up
@@ -101,6 +102,9 @@ public class App extends Application {
               while (timer != 0 && GameState.taskProgress != 3) {
                 Thread.sleep(1000);
                 timer--;
+                int minutes = timer / 60;
+                int seconds = timer % 60;
+                updateMessage(minutes + ":" + String.format("%02d", seconds));
                 updateProgress(timer, 120);
               }
 

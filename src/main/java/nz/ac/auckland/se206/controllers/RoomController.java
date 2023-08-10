@@ -20,6 +20,8 @@ import nz.ac.auckland.se206.gpt.ChatMessage;
 /** Controller class for the room view. */
 public class RoomController {
 
+  public static RoomController instance;
+
   @FXML private ImageView door;
   @FXML private ImageView doorGlow;
   @FXML private ImageView window;
@@ -43,12 +45,14 @@ public class RoomController {
   /** Initializes the room view, it is called when the room loads. */
   public void initialize() throws IOException {
     // Initialization code goes here
+    instance = this;
     App.showDialog(
         "Info",
         "You must escape the room!",
         "Maybe they left the door unlocked. Try clicking on it.");
     new Thread(App.timerTask).start();
     roomTimer.progressProperty().bind(App.timerTask.progressProperty());
+    timerLabel.textProperty().bind(App.timerTask.messageProperty());
     notificationsBox.appendText("\n\n");
 
     try {
@@ -93,16 +97,17 @@ public class RoomController {
     if (GameState.taskProgress == 0) {
       // switch to chat window
       gptManager.readMessage("Solve this riddle to escape!");
-      App.showDialog(
-          "Info",
-          "You jiggle the door handle, but it's locked.",
-          "A robotic voice buzzed through the intercom: \"Solve this riddle to escape!\"");
       if (chatGenerated) {
         // chat window has already been generated, just switch to it
         App.setRoot(AppUi.DOOR_CHAT);
         ;
       } else {
         // chat window has not been generated, generate it and switch to it
+        getNotification("Door", "Describe a door that is locked in two short sentences");
+        App.showDialog(
+            "Info",
+            "You jiggle the door handle, but it's locked.",
+            "A robotic voice buzzed through the intercom: \"Solve this riddle to escape!\"");
         SceneManager.addUi(AppUi.DOOR_CHAT, App.loadFxml("chat"));
         chatGenerated = true;
         App.setRoot(AppUi.DOOR_CHAT);
@@ -146,7 +151,8 @@ public class RoomController {
     } else {
       // user has not solved riddle yet
       if (!vaseDescribed) {
-        getNotification("Vase", "Describe a blue vase that is empy in two short sentences");
+        getNotification(
+            "Vase", "Describe a blue vase that is empty on a table in two short sentences");
         vaseDescribed = true;
       } else {
         App.showDialog("Info", "Nothing happens.", " The vase is empty.");
@@ -228,7 +234,7 @@ public class RoomController {
     vaseGlow.setVisible(false);
   }
 
-  private void getNotification(String source, String prompt) throws IOException {
+  public void getNotification(String source, String prompt) throws IOException {
     try {
       blackoutRectangle.setVisible(true);
       loadingBar.setVisible(true);
