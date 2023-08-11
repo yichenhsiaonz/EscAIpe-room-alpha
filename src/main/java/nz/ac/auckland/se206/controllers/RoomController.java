@@ -103,7 +103,10 @@ public class RoomController {
         ;
       } else {
         // chat window has not been generated, generate it and switch to it
-        getNotification("Door", "Describe a door that is locked in two short sentences");
+        getNotification(
+            "Door",
+            "Describe a wooden door with a brass knob and mail slot to the outside that is locked"
+                + " in two short sentences");
         App.showDialog(
             "Info",
             "You jiggle the door handle, but it's locked.",

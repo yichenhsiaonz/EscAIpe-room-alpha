@@ -132,8 +132,15 @@ public class ChatController {
                   }
                   // show the popup on the main thread and switch back to the room window
                   Runnable successPopup = () -> App.showDialog("Info", popupTitle, popupBody);
-                  App.setRoot(AppUi.ROOM);
-
+                  Runnable returnTaskRunnable =
+                      () -> {
+                        try {
+                          App.setRoot(AppUi.ROOM);
+                        } catch (Exception e) {
+                          e.printStackTrace();
+                        }
+                      };
+                  Platform.runLater(returnTaskRunnable);
                   Platform.runLater(successPopup);
                 } else {
                   // read the response out loud on a background thread
